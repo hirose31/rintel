@@ -197,7 +197,7 @@ module Rintel
 
     def v
       return @v if @v
-      script = @agent.get 'https://www.ingress.com/jsc/gen_dashboard.js'
+      script = @agent.get 'https://www.ingress.com/jsc/gen_dashboard_a9913f22cd769c29601185abbd32fd48cb42df08.js'
       @v = script.body.match(/v="([a-f0-9]{40})";/)[1]
     end
   end
