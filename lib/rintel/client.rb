@@ -14,6 +14,7 @@ module Rintel
       @agent = Mechanize.new
       @agent.user_agent_alias = 'Windows Chrome'
       @log = Logger.new(STDERR)
+      @dashboard_url = nil
 
       if restore_cookie && File.exists?(@@cookie_path)
         @agent.cookie_jar.load(File.new(@@cookie_path))
@@ -188,6 +189,14 @@ module Rintel
       else
         raise GoogleLoginError
       end
+
+      scr = page.search('script[src*="gen_dashboard"]')
+      if !scr.empty?
+        @dashboard_url = scr[0].attr('src')
+      else
+        raise "Cannot get URL of gen_dashboard"
+      end
+
     end
 
     def csrftoken
@@ -197,7 +206,8 @@ module Rintel
 
     def v
       return @v if @v
-      script = @agent.get 'https://www.ingress.com/jsc/gen_dashboard_a9913f22cd769c29601185abbd32fd48cb42df08.js'
+      login if @dashboard_url.nil?
+      script = @agent.get "https://www.ingress.com#{@dashboard_url}"
       @v = script.body.match(/v="([a-f0-9]{40})";/)[1]
     end
   end
