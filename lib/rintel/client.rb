@@ -177,6 +177,10 @@ module Rintel
         form.Email  = @username
         form.Passwd = @password
       end.click_button
+      page = page.form_with(:action => /ServiceLoginAuth/) do |form|
+        form.Email  = @username
+        form.Passwd = @password
+      end.click_button
 
       if page.uri.to_s =~ /SecondFactor/
         print 'Input PIN => '
