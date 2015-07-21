@@ -14,7 +14,6 @@ module Rintel
       @agent = Mechanize.new
       @agent.user_agent_alias = 'Windows Chrome'
       @log = Logger.new(STDERR)
-      @dashboard_url = nil
 
       if restore_cookie && File.exists?(@@cookie_path)
         @agent.cookie_jar.load(File.new(@@cookie_path))
@@ -48,6 +47,8 @@ module Rintel
       rescue JSON::ParserError, Mechanize::ResponseCodeError => e
         @log.error '%s. login and retry...' % e.class
         clear_cookie && retry
+      rescue GoogleLoginError => e
+        abort 'login failed.'
       end
     end
 
@@ -99,6 +100,8 @@ module Rintel
       rescue JSON::ParserError, Mechanize::ResponseCodeError => e
         @log.error '%s. login and retry...' % e.class
         clear_cookie && retry
+      rescue GoogleLoginError => e
+        abort 'login failed.'
       end
     end
 
@@ -154,6 +157,8 @@ module Rintel
       rescue JSON::ParserError, Mechanize::ResponseCodeError => e
         @log.error '%s. login and retry...' % e.class
         clear_cookie && retry
+      rescue GoogleLoginError => e
+        abort 'login failed.'
       end
     end
 
@@ -187,14 +192,6 @@ module Rintel
       else
         raise GoogleLoginError
       end
-
-      scr = page.search('script[src*="gen_dashboard"]')
-      if !scr.empty?
-        @dashboard_url = scr[0].attr('src')
-      else
-        raise "Cannot get URL of gen_dashboard"
-      end
-
     end
 
     def csrftoken
